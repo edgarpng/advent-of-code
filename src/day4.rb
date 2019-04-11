@@ -1,5 +1,4 @@
 require 'time'
-require 'pry'
 
 module Day4
   class LogAnalyzer
