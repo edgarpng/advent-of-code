@@ -8,7 +8,7 @@ module Day4
 
     def statistics
       stats = SleepStatistics.new
-      @events.sort.reduce(stats) {|stats, event| event.process stats}
+      @events.sort.reduce(stats) {|current_stats, event| event.process current_stats}
     end
   end
 
@@ -28,17 +28,25 @@ module Day4
       minutes_slept.each {|minute| register_sleep minute}
     end
 
-    def top_entry
-      sorted_counts = @counts.sort_by {|_, minute_counts| minute_counts.values.sum} 
-      guard_with_most_minutes, minute_count = sorted_counts.last
-      most_frequent_minute = minute_count.sort_by {|_, frequency| frequency}.last.first
-      return guard_with_most_minutes, most_frequent_minute
+    def top_sleeper_by_total_time
+      top_sleeper_by {|minutes| minutes.sum}
+    end
+
+    def top_sleeper_on_single_minute
+      top_sleeper_by {|minutes| minutes.max}
     end
 
     private
     def register_sleep(minute)
       current_count = @counts[current_guard]
       current_count[minute] += 1
+    end
+
+    def top_sleeper_by(&block)
+      sorted_counts = @counts.sort_by {|_, minute_counts| block.call minute_counts.values}
+      top_sleeper, minute_count = sorted_counts.last
+      most_frequent_minute = minute_count.sort_by {|_, frequency| frequency}.last.first
+      return top_sleeper, most_frequent_minute
     end
   end
 
